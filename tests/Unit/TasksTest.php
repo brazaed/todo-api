@@ -19,14 +19,28 @@ class TasksTest extends TestCase
 
         $attributes = [
 
-            'title' => $this->faker->sentence,            
-            'description' => $this->faker->paragraph
+            'title' => $word = $this->faker->word,            
+            'description' => $description = $this->faker->paragraph
         ];
         
+        $response = $this->json('POST', '/api/tasks', $attributes);
 
-        $this->post('/api/tasks', $attributes);
+        \Log::info($response->getContent());
+        
 
         $this->assertDatabaseHas('tasks', $attributes);
+
+        $response
+            ->assertStatus(201)
+            ->assertJsonStructure([
+                'title', 'description', 'created_at'
+            ])
+            ->assertJson([                
+                'title' => $word,
+                'description' => $description
+            ]);
+
+
         
     }    
 }

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Task;
+use App\Http\Resources\Task as TaskResource;
 
 class TasksController extends Controller
 {
@@ -33,12 +34,14 @@ class TasksController extends Controller
         
         ]);
 
-        Task::create([
+        $task = Task::create([
 
             'title' => $request->title,
             'description' => $request->description
 
         ]);
+
+        return response()->json(new TaskResource($task), 201);
 
     }
 
