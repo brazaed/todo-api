@@ -2,8 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use App\Task;
+use Illuminate\Http\Request;
+use App\Http\Resources\TaskCollection;
 use App\Http\Resources\Task as TaskResource;
 
 class TasksController extends Controller
@@ -15,7 +16,8 @@ class TasksController extends Controller
      */
     public function index()
     {
-        //
+        
+        return response()->json(new TaskCollection(Task::paginate()), 200);
     }
 
     /**
@@ -24,22 +26,14 @@ class TasksController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
+    public function store()
     {
-
-        $request->validate([
-
+        $task = request()->validate([
             'title' => 'required',
             'description' => 'required'
-        
-        ]);
+            ]);
 
-        $task = Task::create([
-
-            'title' => $request->title,
-            'description' => $request->description
-
-        ]);
+        $task = Task::create($task);
 
         return response()->json(new TaskResource($task), 201);
 
