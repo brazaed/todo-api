@@ -24,43 +24,86 @@ class TasksTest extends TestCase
         
         $response = $this->json('POST', '/api/tasks', $attributes);
 
-        \Log::info($response->getContent());
-        
-
         $this->assertDatabaseHas('tasks', $attributes);
 
         $response
             ->assertStatus(201)
-            ->assertJsonStructure([
-                'title', 'description', 'created_at'
-            ])
+            ->assertJsonStructure(['title', 'description', 'created_at'])
             ->assertJson([                
                 'title' => $word,
                 'description' => $description
             ]);
     }   
 
-
     /**
      * @test
      */
     public function can_see_tasks()
     {
-        
-        $this->withoutExceptionHandling();
-
 
         factory(\App\Task::class, 20)->create();
 
-        $response = $this->json('GET', '/api/tasks')
-                     ->assertStatus(200)
-                     ->assertJsonStructure([
-                        'data' => [
-                            '*' => ['id', 'title', 'description', 'updated_at']
-                        ],
-                        'links'                      
-                     ]);
+        $this->json('GET', '/api/tasks')
+                ->assertStatus(206)
+                ->assertJsonStructure([
+                    'data' => [
+                        '*' => ['id', 'title', 'description', 'updated_at']
+                    ],
+                    'links'                      
+                ]);
 
     }
 
+    /**
+     * @test
+     **/
+    public function can_see_one_task()
+    {
+        factory(\App\Task::class, 20)->create();
+
+        $this->json('GET', '/api/tasks/1')
+            ->assertStatus(200)
+            ->assertJsonStructure(['title', 'description', 'created_at']);
+
+    }
+
+    /**
+     * @test
+     */
+    public function task_not_found()
+    {
+        
+        $this->json('GET', '/api/tasks/-1')->assertStatus(404);
+        $this->json('DELETE', '/api/tasks/-1')->assertStatus(404);
+
+    }
+
+    /**
+     * @test
+     */
+    public function can_update()
+    {
+        $this->withoutExceptionHandling();
+
+        factory(\App\Task::class, 20)->create();
+        
+        $response = $this->json('PUT', '/api/tasks/1', [
+            'title' =>  'study math',
+            'description' => $this->faker->words
+        ])->assertStatus(200);
+    }   
+    
+    /**
+     * @test
+     */
+    public function can_delete()
+    {
+        $this->withoutExceptionHandling();
+
+        factory(\App\Task::class, 20)->create();
+        
+        $response = $this->json('DELETE', '/api/tasks/1')
+            ->assertJson(['message' => 'Task deleted.'])
+            ->assertStatus(200);
+    }     
 }

@@ -17,7 +17,7 @@ class TasksController extends Controller
     public function index()
     {
         
-        return response()->json(new TaskCollection(Task::paginate()), 200);
+        return response()->json(new TaskCollection(Task::paginate()), 206);
     }
 
     /**
@@ -45,9 +45,9 @@ class TasksController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show()
+    public function show(Task $task)
     {
-        
+        return response()->json(new TaskResource($task), 200);        
     }
 
     /**
@@ -57,9 +57,15 @@ class TasksController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update(Task $task)
     {
-        //
+        
+        request()->validate([
+            'title' => 'required|string'
+        ]);
+
+        return response()->json(new TaskResource($task), 200);
+
     }
 
     /**
@@ -68,8 +74,10 @@ class TasksController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
+    public function destroy(Task $task)
     {
-        //
+        $task->delete();
+
+        return response()->json(['message' => 'Task deleted.'], 200);        
     }
 }
