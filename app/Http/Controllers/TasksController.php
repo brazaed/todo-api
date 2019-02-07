@@ -17,7 +17,7 @@ class TasksController extends Controller
     public function index()
     {
         
-        return response()->json(new TaskCollection(Task::paginate()), 206);
+        return response()->json(new TaskCollection(Task::paginate()), 200);
     }
 
     /**
@@ -29,8 +29,7 @@ class TasksController extends Controller
     public function store()
     {
         $task = request()->validate([
-            'title' => 'required',
-            'description' => 'required'
+            'title' => 'required'
             ]);
 
         $task = Task::create($task);
@@ -63,6 +62,9 @@ class TasksController extends Controller
         request()->validate([
             'title' => 'required|string'
         ]);
+
+        $task->title = request('title');
+        $task->save();
 
         return response()->json(new TaskResource($task), 200);
 
